@@ -160,6 +160,9 @@ fi
 printf "\n\n--FIN--\n\n"
 } 
 
+# Create user logfile
+touch "$userPath"/"$logFile"
+
 # Run the function and add output to logFile
 offboard "$@" 2>&1 | tee -- "$userPath"/"$logFile"
 
