@@ -105,6 +105,12 @@ $gam config csv_output_header_filter "resourceId" redirect csv - > "$userPath"/"
 sleep 0.5
 printf "\n\n--/--\n\n"
 
+# Turn off directory sharing for user
+echo "Turning 'Directory Sharing' off"
+$gam update user "$userEmail" gal off
+sleep 0.5
+printf "\n\n--/--\n\n"
+
 # Remove user from all groups
 echo "Removing user from Google Groups"
 $gam user "$userEmail" delete groups
