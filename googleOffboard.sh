@@ -89,15 +89,15 @@ userPath=$HOME/Offboarded/$userEmail
 
 ###########################
 ###### DO THE THINGS ######
-###########################
-
-offboard() {
-printf "\n\n--START--\n\n"
+##########################
 
 # Create folder for offboarding user
 echo "Creating $userEmail folder"
 mkdir "$userPath"
-printf "\n\n--/--\n\n"
+printf "\n\n--/--\n\n"#
+
+offboard() {
+printf "\n\n--START--\n\n"
 
 # Ouput only resourceIds of our 'csvFile'
 echo "Creating list of managed mobile device resourceIds"
@@ -164,12 +164,19 @@ else
 fi
 
 printf "\n\n--FIN--\n\n"
-} 
+}
 
 # Create user logfile
+echo "Creating log file"
 touch "$userPath"/"$logFile"
 
+# Quick heads up
+echo "Offboard process starting. This will take some time so please keep the terminal window open until complete..."
+
 # Run the function and add output to logFile
-offboard "$@" 2>&1 | tee -- "$userPath"/"$logFile"
+operation "$@" >> "$userPath/$logFile" 2>&1
+
+echo "Offboard complete!"
+printf "\n\n--/--\n\n"
 
 exit 0
