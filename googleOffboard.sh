@@ -78,32 +78,35 @@ sleep 1
 #### SETTING VARIABLES ####
 ###########################
 
+# Today's date
+today=$(date +%Y-%m-%d)
 # Gam binary path
 gam="$HOME/bin/gamadv-xtd3/gam"
 # Log file
-logFile=log.txt
+logFile=$userPath/logFile-"$today".txt
 # Managed mobile device list
-csvFile=mdmList.csv
+mdmList=$userPath/mdmList-"$today".csv
 # Offboarded user folder path
 userPath=$HOME/Offboarded/$userEmail
 
 ###########################
 ###### DO THE THINGS ######
-##########################
+###########################
 
-# Create folder for offboarding user
-echo "Creating $userEmail folder"
-mkdir "$userPath"
-printf "\n\n--/--\n\n"#
+# Create folder for offboarding user if it doesn't exist
+if [ -d "$userPath" ] 
+then
+    printf "User offboarding folder exists. Proceeding...\n\n" 
+else
+    printf "User offboarding folder doesn't exist. Creating...\n\n"
+    mkdir "$userPath"
+fi
+printf "\n\n--/--\n\n"
 
+# Function code
 offboard() {
 printf "\n\n--START--\n\n"
 
-# Ouput only resourceIds of our 'csvFile'
-echo "Creating list of managed mobile device resourceIds"
-$gam config csv_output_header_filter "resourceId" redirect csv - > "$userPath"/"$csvFile" print mobile query "email:$userEmail"
-sleep 0.5
-printf "\n\n--/--\n\n"
 
 # Turn off directory sharing for user
 echo "Turning 'Directory Sharing' off"
@@ -130,15 +133,21 @@ $gam user "$userEmail" deprovision
 sleep 0.5
 printf "\n\n--/--\n\n"
 
+# Create file with resourceIds of the 'mdmList'
+echo "Creating list of managed mobile device resourceIds"
+$gam config csv_output_header_filter "resourceId" redirect csv - > "$mdmList" print mobile query "email:$userEmail"
+sleep 1
+printf "\n\n--/--\n\n"
+
 # Wipe account from managed devices
 echo "Removing Google account from managed mobile device(s)"
-$gam csv "$userPath"/"$csvFile" gam update mobile ~resourceId action account_wipe
-sleep 2
+$gam csv "$mdmList" gam update mobile ~resourceId action account_wipe
+sleep 1
 printf "\n\n--/--\n\n"
 
 # Remove devices from Google Workspace device management
 echo "Removing managed mobile device(s) from Google MDM"
-$gam csv "$userPath"/"$csvFile" gam delete mobile ~resourceId
+$gam csv "$mdmList" gam delete mobile ~resourceId
 sleep 0.5
 printf "\n\n--/--\n\n"
 
@@ -156,10 +165,10 @@ printf "\n\n--/--\n\n"
 
 # Move users to corresponding Archived OU
 if [[ "$userType" == "Contractor" || "$userType" == "contractor" ]]; then
-  echo "Moving user to Archived Contractors"
+  echo "Moving user to Archived Contractors OU"
   $gam update user "$userEmail" ou "/Contractors/Archived Contractors"
 else
-  echo "Moving user to Archived Employees"
+  echo "Moving user to Archived Employees OU"
   $gam update user "$userEmail" ou "/Employees/Archived Employees"
 fi
 
@@ -168,13 +177,13 @@ printf "\n\n--FIN--\n\n"
 
 # Create user logfile
 echo "Creating log file"
-touch "$userPath"/"$logFile"
+touch "$logFile"
 
 # Quick heads up
-echo "Offboard process starting. This will take some time so please keep the terminal window open until complete..."
+echo "Offboard process starting. This may take longer than expected so please keep the terminal window open. A message will confirm once complete."
 
 # Run the function and add output to logFile
-operation "$@" >> "$userPath/$logFile" 2>&1
+operation "$@" >> "$logFile" 2>&1
 
 echo "Offboard complete!"
 printf "\n\n--/--\n\n"
