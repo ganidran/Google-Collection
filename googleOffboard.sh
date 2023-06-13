@@ -82,12 +82,12 @@ sleep 1
 today=$(date +%Y-%m-%d)
 # Gam binary path
 gam="$HOME/bin/gamadv-xtd3/gam"
-# Log file
-logFile=$userPath/logFile-"$today".txt
-# Managed mobile device list
-mdmList=$userPath/mdmList-"$today".csv
 # Offboarded user folder path
 userPath=$HOME/Offboarded/$userEmail
+# Log file
+logFile="$userPath"/logFile-"$today".txt
+# Managed mobile device list
+mdmList="$userPath"/mdmList-"$today".csv
 
 ###########################
 ###### DO THE THINGS ######
@@ -183,7 +183,7 @@ touch "$logFile"
 echo "Offboard process starting. This may take longer than expected so please keep the terminal window open. A message will confirm once complete."
 
 # Run the function and add output to logFile
-operation "$@" >> "$logFile" 2>&1
+offboard "$@" >> "$logFile" 2>&1
 
 echo "Offboard complete!"
 printf "\n\n--/--\n\n"
