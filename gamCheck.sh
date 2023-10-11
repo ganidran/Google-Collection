@@ -24,6 +24,7 @@ latestVersion=$(curl -s https://api.github.com/repos/taers232c/GAMADV-XTD3/relea
 if [ "$currentVersion" = "$latestVersion" ]; then
   echo "--GAM is running the latest version!"
 else
+  echo "Current GAM: $currentVersion. Latest version: $latestVersion"
   printf "\n--GAM is about to update! Please wait...\n\n"
   sleep 1  
   bash <(curl -s -S -L https://raw.githubusercontent.com/taers232c/GAMADV-XTD3/master/src/gam-install.sh) -l
