@@ -88,6 +88,8 @@ userPath=$HOME/Offboarded/$userEmail
 logFile="$userPath"/logFile-"$today".txt
 # Managed mobile device list
 mdmList="$userPath"/mdmList-"$today".csv
+# Shared drive list
+shrdDrvList="$userPath"/"$userEmail"-shrdDrv.csv
 
 ###########################
 ###### DO THE THINGS ######
@@ -107,6 +109,12 @@ printf "\n\n--/--\n\n"
 offboard() {
 printf "\n\n--START--\n\n"
 
+# Reset user's sign-in cookies & set a random pass
+echo "Resetting sign-in cookies and setting a random password"
+$gam user "$userEmail" signout
+$gam update user "$userEmail" password random
+sleep 0.5
+printf "\n\n--/--\n\n"
 
 # Turn off directory sharing for user
 echo "Turning 'Directory Sharing' off"
@@ -114,16 +122,17 @@ $gam update user "$userEmail" gal off
 sleep 0.5
 printf "\n\n--/--\n\n"
 
+# Create list of all shared drives
+echo "Creating list of all shared drives"
+$gam user "$userEmail" print shareddrives fields id,name > "$shrdDrvList"
+
+# Delete all shared drives from user
+echo "Removing shared drive access"
+$gam csv "$shrdDrvList" gam delete drivefileacl ~id ~User
+
 # Remove user from all groups
 echo "Removing user from Google Groups"
 $gam user "$userEmail" delete groups
-sleep 0.5
-printf "\n\n--/--\n\n"
-
-# Reset user's sign-in cookies & set a random pass
-echo "Resetting sign-in cookies and setting a random password"
-$gam user "$userEmail" signout
-$gam update user "$userEmail" password random
 sleep 0.5
 printf "\n\n--/--\n\n"
 
@@ -180,12 +189,31 @@ echo "Creating log file"
 touch "$logFile"
 
 # Quick heads up
-echo "Offboard process starting. This may take longer than expected so please keep the terminal window open. A message will confirm once complete."
+printf "Offboard process starting... \n\nThis may take longer than expected so please keep the terminal window open. \nA message will confirm once complete."
 
 # Run the function and add output to logFile
 offboard "$@" >> "$logFile" 2>&1
 
-echo "Offboard complete!"
-printf "\n\n--/--\n\n"
+echo "Almost there..."
+
+##################################################
+## MV OFFBOARDING FOLDER TO GOOGLE SHARED DRIVE ##
+##################################################
+
+# Python script variables
+sharedDriveId="<sharedDriveId>"
+destinationFolderId="<folderId>"
+credentialsFile="<pathToGoogleCredentials>"
+pyScript="<pathToPythonScript>"
+
+# Confirm if py script exists
+if [[ -f "$pyScript" ]]; then
+    # Run the Python script 
+    python "$pyScript" "$userPath" "$sharedDriveId" "$destinationFolderId" "$credentialsFile"
+    printf "\n\n--/--\n\n"
+else
+    printf "Offboarding complete! Please check user offboarding folder in your local home directory.\n\n"
+    printf "\n\n--/--\n\n"
+fi
 
 exit 0
