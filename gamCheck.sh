@@ -22,7 +22,7 @@ latestVersion=$(curl -s https://api.github.com/repos/taers232c/GAMADV-XTD3/relea
 ###########################
 
 if [ "$currentVersion" = "$latestVersion" ]; then
-  echo "--GAM is running the latest version!"
+  echo "--GAM is running the latest version: $currentVersion"
 else
   echo "Current GAM: $currentVersion. Latest version: $latestVersion"
   printf "\n--GAM is about to update! Please wait...\n\n"
